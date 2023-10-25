@@ -1,6 +1,11 @@
+document.oncontextmenu = function () {
+  return false
+}
+
 // переменная
 let userData = null
 let selectedPoints = 0
+let gameId = null
 
 // input
 const getRegistration = document.querySelector('.signup-name')
@@ -66,7 +71,20 @@ otherInput.addEventListener('change', function (event) {
 
 gameButton.addEventListener('click', function (event) {
   if (event.target.innerHTML === 'Играть') {
+    const payload = {
+      username: userData.username,
+      points: selectedPoints
+    }
+    startGame(payload)
     activateFields()
+  } else {
+    const payload = {
+      username: userData.username,
+      game_id: gameId
+    }
+
+    finishGame(payload)
+    resetFields()
   }
 
   event.target.innerHTML === 'Играть'
@@ -114,7 +132,12 @@ async function loginUser (username) {
 }
 
 async function startGame (startGameData) {
-  const data = await sendRequest('new game', 'POSt', startGameData)
+  const data = await sendRequest('new_game', 'POST', startGameData)
+  gameId = data.game_id
+  renderUser({
+    username: userData.username,
+    balance: data.user_balance
+  })
   return data
 }
 
@@ -131,7 +154,7 @@ async function finishGame (finishGameData) {
 async function sendRequest (url, method, data) {
   url = `https://tg-api.tehnikum.school/tehnikum_course/minesweeper/${url}`
 
-  if (method == 'POST') {
+  if (method === 'POST') {
     let response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -143,7 +166,7 @@ async function sendRequest (url, method, data) {
 
     response = await response.json()
     return response
-  } else if (method == 'GET') {
+  } else if (method === 'GET') {
     url = url + '?' + new URLSearchParams(data)
     let response = await fetch(url, {
       method: 'GET',
@@ -158,7 +181,12 @@ async function sendRequest (url, method, data) {
 }
 
 function activateFields () {
-  fieldCells.forEach((element) => element.classList.add('active'))
+  fieldCells.forEach((element) => {
+    element.classList.add('active')
+    element.addEventListener('contextmenu', function () {
+      element.classList.add('flag')
+    })
+  })
 }
 function resetFields () {
   fieldCells.forEach((element) => {

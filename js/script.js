@@ -138,6 +138,9 @@ async function startGame (startGameData) {
     username: userData.username,
     balance: data.user_balance
   })
+
+  renderTable(data.table)
+
   return data
 }
 
@@ -186,8 +189,19 @@ function activateFields () {
     element.addEventListener('contextmenu', function () {
       element.classList.add('flag')
     })
+    element.addEventListener('click', function () {
+      const row = element.getAttribute('row')
+      const column = element.getAttribute('column')
+
+      selectField({
+        game_id: gameId,
+        row, // row: row,
+        column // column: column
+      })
+    })
   })
 }
+
 function resetFields () {
   fieldCells.forEach((element) => {
     element.classList.remove('active')
@@ -202,5 +216,17 @@ function toggleGameButton () {
     gameButton.classList.remove('disabled-button')
   } else {
     gameButton.classList.add('disabled-button')
+  }
+}
+
+function renderTable (table) {
+  let elementIndex = 0
+  for (let i = 0; i < table.length; i++) {
+    const tableRow = table[i]
+    for (let j = 0; j < tableRow.length; j++) {
+      fieldCells[elementIndex].setAttribute('row', i)
+      fieldCells[elementIndex].setAttribute('column', j)
+      elementIndex += 1
+    }
   }
 }
